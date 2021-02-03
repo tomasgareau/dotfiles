@@ -2,10 +2,12 @@
 
 " vim-plug
 call plug#begin()
-Plug 'altercation/vim-colors-solarized'
+" Plug 'altercation/vim-colors-solarized'
+Plug 'lifepillar/vim-solarized8'
 Plug 'dense-analysis/ale'
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'deoplete-plugins/deoplete-jedi'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-commentary'
@@ -34,7 +36,9 @@ set autoindent                      " Minimal automatic indenting
 set ruler                           " Show line numbers at bottom-right
 set number                          " Line numbering
 set nowrap                          " Disable line wrapping
-colorscheme solarized               " Set colorscheme
+set termguicolors                   " Enable TrueColor support
+set background=light                " Set background -- nvim can't detect it when running in tmux
+colorscheme solarized8              " Set colorscheme
 
 set laststatus=2                    " Always show statusline
 set statusline=
