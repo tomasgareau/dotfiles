@@ -2,13 +2,20 @@
 
 " vim-plug
 call plug#begin()
-" Plug 'altercation/vim-colors-solarized'
-Plug 'lifepillar/vim-solarized8'
+Plug 'airblade/vim-gitgutter'
+Plug 'artur-shaik/vim-javacomplete2'
+Plug 'christianrondeau/vim-base64'
 Plug 'dense-analysis/ale'
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'deoplete-plugins/deoplete-jedi'
+Plug 'davidhalter/jedi-vim'
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
+Plug 'lifepillar/vim-solarized8'
+Plug 'preservim/nerdtree'
+Plug 'preservim/tagbar'
+Plug 'ervandew/supertab'
 Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-fugitive'
@@ -91,7 +98,23 @@ command! ProjFiles execute 'Files' s:find_git_root()
 
 " Leader commands
 "" Misc
+" Clear highlights
 nnoremap <leader><space> :noh<CR>   
+
+" Search down/up to next non-whitespace
+function FloatToNonWhitespace(up)
+  let searchbak=@/
+  if a:up
+    call search('\%' . virtcol('.') . 'v\S', 'bW')
+  else
+    call search('\%' . virtcol('.') . 'v\S', 'W')
+  endif
+  let @/=searchbak
+endfunction
+" nnoremap <leader>j /\%<C-R>=virtcol(".")<CR>v\S<CR>
+" nnoremap <leader>k ?\%<C-R>=virtcol(".")<CR>v\S<CR>
+nnoremap <leader>j :call FloatToNonWhitespace(0)<CR>
+nnoremap <leader>k :call FloatToNonWhitespace(1)<CR>
 
 "" vim-fugitive
 nnoremap <leader>gs :Gstatus<CR>
@@ -126,10 +149,13 @@ let g:ycm_autoclose_preview_window_after_completion = 1
 
 
 "" ALE
+" let g:ale_virtualenv_dir_names = ['~/.config/nvim/env']
 let g:ale_fixers = {
 \   'python': ['black'],
+\   'c': ['clang-format'],
 \   'cpp': ['clang-format'],
 \   'go': ['gofmt'],
+\   'java': ['google_java_format'],
 \   'javascript': ['prettier'],
 \   'css': ['prettier'],
 \   'json': ['prettier'],
@@ -140,12 +166,16 @@ let g:ale_fixers = {
 let g:ale_linters = {
 \   'python': ['flake8'],
 \   'cpp': ['cpplint'],
+\   'java': ['eclipselsp'],
 \   'javascript': ['eslint'],
 \   'css': ['eslint'],
 \   'json': ['eslint'],
 \   'html': ['eslint'],
 \   'vue': ['eslint'],
 \}
+
+let g:ale_java_google_java_format_executable = "/home/tomas/Coding/google-java-format"
+let g:ale_java_eclipselsp_executable_path = "/home/tomas/Coding/eclipse.jdt.ls"
 
 nnoremap <leader>f :ALEFix<CR>
 
@@ -154,3 +184,47 @@ let g:python_highlight_all = 1
 
 "" Deoplete
 let g:deoplete#enable_at_startup = 1
+call deoplete#custom#option({
+\   'ignore_case': v:true,
+\   'smart_case': v:true,
+\})
+
+" Close preview window after completion
+autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
+
+" complete with words from any opened file
+let g:context_filetype#same_filetypes = {}
+let g:context_filetype#same_filetypes._ = '_'
+
+"" Jedi-vim
+
+" Disable autocompletion (using deoplete instead)
+let g:jedi#completions_enabled = 0
+
+"" tagbar
+nnoremap <leader>t :TagbarToggle<CR>
+
+"" NERDTree
+nnoremap <C-n> :NERDTreeToggle<CR>
+nnoremap <C-f> :NERDTreeFind<CR>
+
+"" supertab
+let g:SuperTabDefaultCompletionType = "<C-n>"
+
+"" MarkdownPreview
+let g:mkdp_preview_options = {
+    \ 'mkit': {},
+    \ 'katex': {},
+    \ 'uml': { 'server': 'http://127.0.0.1:12345'},
+    \ 'maid': {},
+    \ 'disable_sync_scroll': 0,
+    \ 'sync_scroll_type': 'middle',
+    \ 'hide_yaml_meta': 1,
+    \ 'sequence_diagrams': {},
+    \ 'flowchart_diagrams': {},
+    \ 'content_editable': v:false,
+    \ 'disable_filename': 0
+    \ }
+
+"" vim-javacomplete2
+autocmd FileType java setlocal omnifunc=javacomplete#Complete
